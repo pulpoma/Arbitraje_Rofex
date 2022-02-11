@@ -100,42 +100,50 @@ class StrategyArbitrage:
             if month in message_instrument:
                 return mes_s_i[month]
 
-    def arbitraje_tasas(self, dataframe_tasa_ws):  #TODO TERMINAR LAS ORDENES
-        print("Y")
+    def arbitraje_tasas(self, dataframe_tasa_ws):  # TODO TERMINAR LAS ORDENES
         arbitraje_dict = {}
         count = 0
-        #
         for offer in dataframe_tasa_ws['offer']:
             for bid in dataframe_tasa_ws['bid']:
                 # print(f'arbitraje: {count}')
                 # print(f'bid: {bid}')
                 # print(f'offer: {offer}')
 
-                if bid < offer and (self.fire_power > (self.size * 2)):  #TODO cambiar el signo
-                    print("OPERACION")
-                    print("BID", dataframe_tasa_ws[dataframe_tasa_ws['bid'] == bid].index[0])
-                    print("OFFER", dataframe_tasa_ws[dataframe_tasa_ws['offer'] == offer].index[0])
+                if bid < offer and (self.fire_power > (self.size * 2)):  # TODO cambiar el signo >
+                    print("\narbitraje_tasas ")
+                    # print("BID", dataframe_tasa_ws[dataframe_tasa_ws['bid'] == bid].index[0])
+                    # print("Price", self.future_ws_df[dataframe_tasa_ws['bid'] == bid]['bid'][0] * (1 - self.commission))
+                    # print("")
+                    # print("OFFER", dataframe_tasa_ws[dataframe_tasa_ws['offer'] == offer].index[0])
+                    # print("Price", self.future_ws_df[dataframe_tasa_ws['offer'] == offer]['offer'] * (1 + self.commission))
 
-                    operacion_offer = dataframe_tasa_ws[dataframe_tasa_ws['offer'] == offer].index[0]
-                    operacion_bid = dataframe_tasa_ws[dataframe_tasa_ws['bid'] == bid].index[0]
+                    # ticker_offer = dataframe_tasa_ws[dataframe_tasa_ws['offer'] == offer].index[0]
+                    # price_offer = self.future_ws_df[dataframe_tasa_ws['offer'] == offer]['offer'][0] * (1 + self.commission)
+                    # ticker_bid = dataframe_tasa_ws[dataframe_tasa_ws['bid'] == bid].index[0]
+                    # price_bid = self.future_ws_df[dataframe_tasa_ws['bid'] == bid]['bid'][0] * (1 - self.commission)
+                    #
+                    # print(f"offer \n ticker: ({ticker_offer}), price: ({price_offer})")
+                    # print(f"bid \n ticker: ({ticker_bid}), price: ({price_offer})")
+                    # # print(ticker_bid, price_offer)
+                    #
+                    # self.send_order(str(ticker_offer), pyRofex.Side.BUY, price_offer)
+                    # self.send_order(ticker_bid, pyRofex.Side.SELL, price_bid)
+                    # #             #
+                    # self.fire_power -= self.size * 2
+                    # print("Firepower left: ", self.fire_power)
 
-                    self.send_order(operacion_offer, pyRofex.Side.BUY)
-                    self.send_order(operacion_bid, pyRofex.Side.SELL)
-        #             #
-                    self.fire_power -= self.size * 2
-                    print(self.fire_power)
-        #             #
-        #             # arbitraje_dict.update(
-        #             #     {f"{datetime.datetime.today()}":
-        #             #          {f"{dataframe_tasa_ws[dataframe_tasa_ws['bid'] == bid].index[0]}-{count}":
-        #             #               (bid, (dataframe_tasa_ws[dataframe_tasa_ws['offer'] == offer].index[0], offer))}})
-        #             count += 1
+                    arbitraje_dict.update(
+                        {f"{dataframe_tasa_ws[dataframe_tasa_ws['bid'] == bid].index[0]}-{count}" : bid, f"{dataframe_tasa_ws[dataframe_tasa_ws['offer'] == offer].index[0]}": offer})
+                    count += 1
         #         else:
         #             pass
-        # arbitraje_df = pd.DataFrame(arbitraje_dict).T.sort_index()
+
+        arbitraje_df = pd.DataFrame(arbitraje_dict).T.sort_index()
         # arbitraje_df.columns = ['bid', 'offer']
-        # self.arbitraje_df = arbitraje_df
-        # return self.arbitraje_df
+        arbitraje_df.columns = ['bid ticker', 'bid tasa', 'offer ticker', 'offer tasa']
+        # arbitraje_df.columns = ['bid ticker', 'bid price', 'bid tasa', 'offer ticker', 'offer price', 'offer tasa']
+        self.arbitraje_df = arbitraje_df
+        return self.arbitraje_df
 
     # por que no funciona @property?
     def market_data_handler(self, message):
@@ -159,27 +167,29 @@ class StrategyArbitrage:
         self.future_ws_df = self.future_ws_df.sort_values(by=['year', 'month'], ascending=[True, True])
         self.tasas = GetTasa.tasas_futuros(self.spot, self.future_ws_df)
 
-        print("XXXXXXXXXX\n", self.arbitraje_tasas(self.tasas))
+        self.arbitraje_tasas(self.tasas) #
 
-        # print(self.arbitraje_df)
+        print(self.arbitraje_df)
         print(self.future_ws_df)
         print(self.tasas)
         # return self.future_ws_df ,self.tasas
 
     @property
-    def send_order(self, ticker, side):  #TODO CHECKEAR QUE LAS ORDENES SE MANDEN
-        order = pyRofex.send_order(
+    def send_order(self, ticker, side, price):  # TODO CHECKEAR QUE LAS ORDENES SE MANDEN
+        print("\nSEND ORDER ")
+        pyRofex.send_order(
             ticker=ticker,
             side=side,
             size=self.size,
-            # price = md["marketData"]["BI"][0]["price"],
-            order_type=pyRofex.OrderType.MARKET)
+            price=price,
+            order_type=pyRofex.OrderType.LIMIT)
 
         self.order_history.loc[(order['order']['clientId'])] = [ticker, side, self.size]
         print(f"{side} order: {order['order']['clientId']}")
+        print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
 
     @property
-    def cancel_order(self):  #TODO AGREGAR UN CASE POR LAS DUDAS(?)
+    def cancel_order(self):  # TODO AGREGAR UN CASE POR LAS DUDAS(?)
         pass
 
 

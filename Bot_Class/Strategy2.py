@@ -143,14 +143,15 @@ class StrategyArbitrage:
                     # print("Firepower left: ", self.fire_power)
 
                     arbitraje_dict.update(
-                        {f"{dataframe_tasa_ws[dataframe_tasa_ws['bid'] == bid].index[0]}-{count}" : bid, f"{dataframe_tasa_ws[dataframe_tasa_ws['offer'] == offer].index[0]}": offer})
+                        {f"{dataframe_tasa_ws[dataframe_tasa_ws['bid'] == bid].index[0]}-{count}":
+                                  (bid, (dataframe_tasa_ws[dataframe_tasa_ws['offer'] == offer].index[0], offer))})
                     count += 1
         #         else:
         #             pass
 
         arbitraje_df = pd.DataFrame(arbitraje_dict).T.sort_index()
-        # arbitraje_df.columns = ['bid', 'offer']
-        arbitraje_df.columns = ['bid ticker', 'bid tasa', 'offer ticker', 'offer tasa']
+        arbitraje_df.columns = ['bid', 'offer']
+#         arbitraje_df.columns = ['bid ticker', 'bid tasa', 'offer ticker', 'offer tasa']
         # arbitraje_df.columns = ['bid ticker', 'bid price', 'bid tasa', 'offer ticker', 'offer price', 'offer tasa']
         self.arbitraje_df = arbitraje_df
         return self.arbitraje_df

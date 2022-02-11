@@ -119,7 +119,7 @@ class StrategyArbitrage:
                 # print(f'bid: {bid}')
                 # print(f'offer: {offer}')
 
-                if bid < offer and (self.fire_power > (self.size * 2)):  # TODO cambiar el signo >
+                if bid < offer and (self.fire_power > (self.size * 2)):  # TODO cambiar el signo > esta asi para forzar que se cumpla la condicion asi testeo el codigo
                     print("\narbitraje_tasas ")
                     # print("BID", dataframe_tasa_ws[dataframe_tasa_ws['bid'] == bid].index[0])
                     # print("Price", self.future_ws_df[dataframe_tasa_ws['bid'] == bid]['bid'][0] * (1 - self.commission))

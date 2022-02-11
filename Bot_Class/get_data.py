@@ -14,8 +14,9 @@ class GetData():
 
     @property
     def instruments_load(self):
+        """Trae todos los instrumentos de ROFEX para luego usarlos en las operaciones"""
         import pyRofex as pyRofex
-
+        
         self.LogIn.initialize  
 
         instruments_step = []
@@ -42,6 +43,7 @@ class GetData():
 
     @property
     def spot_df(self):
+        """Trae los precios del SPOT de los activos desde YF, idealmente en el futuro tambien seria una actualizacion atomatica de los precios SPOT"""
         import datetime as datetime
         import yfinance as yf
         import pandas as pd
@@ -68,6 +70,7 @@ class GetData():
 
     @property
     def future_rest_df(self):
+        """Trae los valores de los futuros de ROFEX"""
         import pyRofex as pyRofex
         import numpy as np
         import pandas as pd
@@ -90,10 +93,10 @@ class GetData():
         # BID
         bid = {}
         for activo in self.instruments:
-
             """Trato de traer los valores del precio"""
             """Si no trae valores de precio y necesito probar algo de las funciones que siguen, puedo tratar de importar
             los datos del cierre o del ultimo precio"""
+            
             try:
                 bid[activo] = resp_dict[activo]['marketData']['BI'][0]['price']            
             except:

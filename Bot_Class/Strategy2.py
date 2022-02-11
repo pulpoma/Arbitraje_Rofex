@@ -18,7 +18,7 @@ class StrategyArbitrage:
         import matplotlib.pyplot as plt
         from datetime import datetime
 
-        """Define General Variables"""
+        """Defino General Variables"""
         self.instrument = ['DLR/FEB22', 'DLR/MAR22', 'DLR/ABR22', 'DLR/MAY22', 'DLR/JUN22', 'DLR/JUL22', 'DLR/AGO22',
                            'DLR/SEP22', 'DLR/OCT22', 'DLR/NOV22']
         # self.instrument = instrument
@@ -29,8 +29,6 @@ class StrategyArbitrage:
         self.spot = spot
         self.arbitraje_df = pd.DataFrame()
 
-        self.last_md = None
-
         """Define Trading Variables"""
         self.commission = .005
         self.fire_power = 10
@@ -38,6 +36,7 @@ class StrategyArbitrage:
         self.order_history = pd.DataFrame(columns=["order id", "ticker", "side", "size"])
         self.order_history.set_index('order id', inplace=True)
 
+        
         """API Connection"""
         # Initialize the environment
         # pyRofex.initialize(user="luciomassimi3968", password = "feulrX6%", account = "REM3968", environment=pyRofex.Environment.REMARKET)
@@ -58,8 +57,12 @@ class StrategyArbitrage:
         # Subscribes to receive order report for the default account
         pyRofex.order_report_subscription()
 
+        
+        
     @staticmethod
     def plot_prices(dataframe):
+        """Plotear como cambian las tasas y precios de los activos"""
+        
         # plt.figure(figsize=(18, 10))
         x = dataframe.index
         y_bid = dataframe['bid'].loc[x]
@@ -80,7 +83,7 @@ class StrategyArbitrage:
 
     @staticmethod
     def add_year(message_instrument):
-
+        """Agrego el ano a cada row de los activos que se importan para calcular la tasa"""
         ano_s = ['22', '23', '24']
         ano_i = [2022, 2023, 2024]
         ano_s_i = dict(zip(ano_s, ano_i))
@@ -89,9 +92,11 @@ class StrategyArbitrage:
             if year in message_instrument:
                 return ano_s_i[year]
 
+            
+            
     @staticmethod
     def add_month(message_instrument):
-
+        """Agrego el mes a cada row de los activos que se importan para calcular la tasa"""
         mes_s = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC']
         mes_i = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
         mes_s_i = dict(zip(mes_s, mes_i))
@@ -100,7 +105,12 @@ class StrategyArbitrage:
             if month in message_instrument:
                 return mes_s_i[month]
 
+            
+            
     def arbitraje_tasas(self, dataframe_tasa_ws):  # TODO TERMINAR LAS ORDENES
+        """ Crea un diccionario de todas las oportinidades de arbitraje que hay, y luego usa
+        self.send_order() para mandar las operaciones de compra y venta"""
+        
         arbitraje_dict = {}
         count = 0
         for offer in dataframe_tasa_ws['offer']:
@@ -145,7 +155,30 @@ class StrategyArbitrage:
         self.arbitraje_df = arbitraje_df
         return self.arbitraje_df
 
-    # por que no funciona @property?
+    
+    
+    @property
+    def send_order(self, ticker, side, price):  # TODO CHECKEAR QUE LAS ORDENES SE MANDEN
+        print("\n SEND ORDER ")
+        pyRofex.send_order(
+            ticker=ticker,
+            side=side,
+            size=self.size,
+            price=price,
+            order_type=pyRofex.OrderType.LIMIT)
+
+        self.order_history.loc[(order['order']['clientId'])] = [ticker, side, self.size]
+        print(f"{side} order: {order['order']['clientId']}")
+
+        
+        
+    @property
+    def cancel_order(self):  # TODO AGREGAR UN CASE POR LAS DUDAS(?)
+        pass
+    
+    
+    
+# por que no funciona @property?  #TODO leer
     def market_data_handler(self, message):
         from datetime import datetime
 
@@ -173,25 +206,6 @@ class StrategyArbitrage:
         print(self.future_ws_df)
         print(self.tasas)
         # return self.future_ws_df ,self.tasas
-
-    @property
-    def send_order(self, ticker, side, price):  # TODO CHECKEAR QUE LAS ORDENES SE MANDEN
-        print("\nSEND ORDER ")
-        pyRofex.send_order(
-            ticker=ticker,
-            side=side,
-            size=self.size,
-            price=price,
-            order_type=pyRofex.OrderType.LIMIT)
-
-        self.order_history.loc[(order['order']['clientId'])] = [ticker, side, self.size]
-        print(f"{side} order: {order['order']['clientId']}")
-        print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-
-    @property
-    def cancel_order(self):  # TODO AGREGAR UN CASE POR LAS DUDAS(?)
-        pass
-
 
 """TEST """
 log_in_1 = LogIn(user, password, account)

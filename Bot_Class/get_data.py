@@ -2,7 +2,7 @@
 
 class GetData():
     
-    def __init__(self, LogIn, *args):  #Si no funciona, cambiar el "LogIn" por login
+    def __init__(self, LogIn, *args):
         self.LogIn = LogIn
         self.tickers = list(args)
 

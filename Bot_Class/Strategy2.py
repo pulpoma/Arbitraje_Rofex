@@ -128,9 +128,9 @@ class StrategyArbitrage:
                     # print("Price", self.future_ws_df[dataframe_tasa_ws['offer'] == offer]['offer'] * (1 + self.commission))
 
                     # ticker_offer = dataframe_tasa_ws[dataframe_tasa_ws['offer'] == offer].index[0]
-                    # price_offer = self.future_ws_df[dataframe_tasa_ws['offer'] == offer]['offer'][0] * (1 + self.commission)
+                    # price_offer = self.future_ws_df[dataframe_tasa_ws['offer'] == offer]['offer'][0] 
                     # ticker_bid = dataframe_tasa_ws[dataframe_tasa_ws['bid'] == bid].index[0]
-                    # price_bid = self.future_ws_df[dataframe_tasa_ws['bid'] == bid]['bid'][0] * (1 - self.commission)
+                    # price_bid = self.future_ws_df[dataframe_tasa_ws['bid'] == bid]['bid'][0]
                     #
                     # print(f"offer \n ticker: ({ticker_offer}), price: ({price_offer})")
                     # print(f"bid \n ticker: ({ticker_bid}), price: ({price_offer})")

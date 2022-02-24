@@ -112,34 +112,48 @@ class StrategyArbitrage:
                         activa la operacion. Solo se van a ejecutar operaciones que no esten activos.
                         Luego se puede modificar para que sean operaciones no activas, o que el arbitraje sea mejor
                         (mas diferencia entre las tasas)"""
-                        for prev_offer_id in self.order_active.loc[self.order_active['ticker'] == ticker_offer][
-                            'intern_id']:
-                            for prev_bid_id in self.order_active.loc[self.order_active['ticker'] == ticker_bid][
-                                'intern_id']:
-                                if prev_offer_id == prev_bid_id:
+                        if not self.order_active.loc[self.order_active['ticker'] == ticker_offer]['intern_id'].empty:
+                            if not self.order_active.loc[self.order_active['ticker'] == ticker_bid]['intern_id'].empty:
 
-                                    k_offer = self.order_active.loc[
-                                        (self.order_active['intern_id'] == prev_offer_id) & (
-                                                self.order_active['side'] == pyRofex.Side.BUY)]['ticker'][0]
-                                    k_bid = self.order_active.loc[(self.order_active['intern_id'] == prev_bid_id) & (
-                                            self.order_active['side'] == pyRofex.Side.SELL)]['ticker'][0]
+                                for prev_offer_id in self.order_active.loc[self.order_active['ticker'] == ticker_offer][
+                                    'intern_id']:
+                                    print(prev_offer_id)
+                                    for prev_bid_id in self.order_active.loc[self.order_active['ticker'] == ticker_bid][
+                                        'intern_id']:
+                                        print(prev_bid_id)
+                                        if prev_offer_id == prev_bid_id:
 
-                                    key2 = k_offer + k_bid
+                                            k_offer = self.order_active.loc[
+                                                (self.order_active['intern_id'] == prev_offer_id) & (
+                                                        self.order_active['side'] == pyRofex.Side.BUY)]['ticker'][0]
+                                            k_bid = self.order_active.loc[(self.order_active['intern_id'] == prev_bid_id) & (
+                                                    self.order_active['side'] == pyRofex.Side.SELL)]['ticker'][0]
 
-                                    print(f"New Key: {key1}")
-                                    print(f"Existing Key: {key2}")
+                                            key2 = k_offer + k_bid
 
-                                    if key1 != key2:
+                                            print(f"New Key: {key1}")
+                                            print(f"Existing Key: {key2}")
 
-                                        self.send_order(ticker_offer, pyRofex.Side.BUY, self.intern_id, price_offer,
-                                                        offer)
-                                        self.send_order(ticker_bid, pyRofex.Side.SELL, self.intern_id, price_bid, bid)
-                                        self.intern_id += 1
-                                        self.fire_power -= self.size * 2
-                                        print("Firepower Left: ", self.fire_power)
-                                        self.count += 1
-                                    else:
-                                        print("Don't Repeat!")
+                                            if key1 != key2:
+
+                                                self.send_order(ticker_offer, pyRofex.Side.BUY, self.intern_id, price_offer,
+                                                                offer)
+                                                self.send_order(ticker_bid, pyRofex.Side.SELL, self.intern_id, price_bid, bid)
+                                                self.intern_id += 1
+                                                self.fire_power -= self.size * 2
+                                                print("Firepower Left: ", self.fire_power)
+                                                self.count += 1
+                                            else:
+                                                print("Don't Repeat!")
+                        else:
+                            self.send_order(ticker_offer, pyRofex.Side.BUY, self.intern_id, price_offer,
+                                           offer)
+                            self.send_order(ticker_bid, pyRofex.Side.SELL, self.intern_id, price_bid, bid)
+                            self.intern_id += 1
+                            self.fire_power -= self.size * 2
+                            print("Firepower Left: ", self.fire_power)
+                            self.count += 1
+
 
 
     def send_order(self, ticker, side, intern_id, price_bid_offer, tasa_bid_offer):
@@ -205,9 +219,14 @@ class StrategyArbitrage:
         if self.fire_power <= (self.maxoperation - 2):
             """Un check extra, no se podria "cerrar" una operacion si no hay ninguna abierta"""
             for offer in df['offer']:
+
                 for bid in df['bid']:
                     ticker_bid_new = df[df['bid'] == bid].index[0]
                     ticker_offer_new = df[df['offer'] == offer].index[0]
+                    print('offer')
+                    print(ticker_offer_new)
+                    print('bid')
+                    print(ticker_bid_new)
 
                     """El key lo uso para asegurarme que el order del bid y offer sea igual a la de la operacion
                     que ya se habia hecho antes. Si solo checkeo que ahora el bid sea menor al offer para cerrar
@@ -216,7 +235,7 @@ class StrategyArbitrage:
                     La idea del key es para asegurar que se este cerrando la operacion correcta"""
 
                     key1 = ticker_bid_new + ticker_offer_new
-                    # print(f"key: {key1}")
+                    print(f"key: {key1}")
 
                     if bid >= offer and (ticker_bid_new != ticker_offer_new):
                         intern_id_bid_list = self.order_active[self.order_active['ticker'] == ticker_bid_new][

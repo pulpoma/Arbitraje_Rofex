@@ -117,10 +117,10 @@ class StrategyArbitrage:
 
                                 for prev_offer_id in self.order_active.loc[self.order_active['ticker'] == ticker_offer][
                                     'intern_id']:
-                                    print(prev_offer_id)
+                                    
                                     for prev_bid_id in self.order_active.loc[self.order_active['ticker'] == ticker_bid][
                                         'intern_id']:
-                                        print(prev_bid_id)
+                                        
                                         if prev_offer_id == prev_bid_id:
 
                                             k_offer = self.order_active.loc[
@@ -223,10 +223,10 @@ class StrategyArbitrage:
                 for bid in df['bid']:
                     ticker_bid_new = df[df['bid'] == bid].index[0]
                     ticker_offer_new = df[df['offer'] == offer].index[0]
-                    print('offer')
-                    print(ticker_offer_new)
-                    print('bid')
-                    print(ticker_bid_new)
+                    # print('offer')
+                    # print(ticker_offer_new)
+                    # print('bid')
+                    # print(ticker_bid_new)
 
                     """El key lo uso para asegurarme que el order del bid y offer sea igual a la de la operacion
                     que ya se habia hecho antes. Si solo checkeo que ahora el bid sea menor al offer para cerrar
